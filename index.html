@@ -137,83 +137,112 @@
 
     <h1 class="text-3xl font-bold mb-4 text-slate-700">天台積水監察</h1>
     
-    <button id="connect-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 mb-6 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-        </svg>
-        連接 Micro:bit (Serial)
-    </button>
+    <!-- 頂部控制列 (模式選擇 & 連線按鈕) -->
+    <div class="flex items-center gap-4 mb-6">
+        <select id="mode-selector" class="bg-white border-2 border-slate-300 text-slate-700 font-bold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer h-[44px]">
+            <option value="roof">模擬天台</option>
+            <option value="single">單塊地板</option>
+        </select>
 
-    <!-- 天台互動場景 -->
-    <div id="scene-container" class="relative w-[600px] h-[400px] bg-gradient-to-b from-sky-300 to-sky-100 border-2 border-slate-300 rounded-xl overflow-hidden shadow-lg mb-8">
-        
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div id="iso-grid" class="grid grid-cols-10 grid-rows-10 border-2 border-gray-600 bg-gray-500">
-                <!-- 方格將由 JS 生成 -->
+        <button id="connect-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 rounded-lg shadow-md transition duration-300 h-[44px] flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+            </svg>
+            連接 Micro:bit (Serial)
+        </button>
+    </div>
+
+    <!-- ================= 模式 1：模擬天台 (Roof Mode) ================= -->
+    <div id="roof-mode-container" class="flex flex-col items-center w-full">
+        <!-- 天台互動場景 -->
+        <div id="scene-container" class="relative w-[600px] h-[400px] bg-gradient-to-b from-sky-300 to-sky-100 border-2 border-slate-300 rounded-xl overflow-hidden shadow-lg mb-8">
+            
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div id="iso-grid" class="grid grid-cols-10 grid-rows-10 border-2 border-gray-600 bg-gray-500">
+                    <!-- 方格將由 JS 生成 -->
+                </div>
             </div>
-        </div>
 
-        <!-- 左下角控制區 -->
-        <div class="absolute bottom-4 left-4 flex flex-col items-start gap-2 z-10">
-            <div class="flex items-center gap-2 bg-white/90 p-2 rounded-lg shadow-sm border border-slate-200">
-                <select id="rain-type" class="bg-white border border-blue-300 text-blue-700 text-sm font-bold px-2 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
-                    <option value="1">微雨 (黃)</option>
-                    <option value="2">大雨 (紅)</option>
-                </select>
-                <button id="rain-btn" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1 shadow-sm">
-                    <span>🌧️</span> <span>開始下雨</span>
+            <!-- 左下角控制區 -->
+            <div class="absolute bottom-4 left-4 flex flex-col items-start gap-2 z-10">
+                <div class="flex items-center gap-2 bg-white/90 p-2 rounded-lg shadow-sm border border-slate-200">
+                    <select id="rain-type" class="bg-white border border-blue-300 text-blue-700 text-sm font-bold px-2 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                        <option value="1">微雨 (黃)</option>
+                        <option value="2">大雨 (紅)</option>
+                    </select>
+                    <button id="rain-btn" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1 shadow-sm">
+                        <span>🌧️</span> <span>開始下雨</span>
+                    </button>
+                </div>
+                <!-- 還原清除按鈕 -->
+                <button id="reset-btn" class="bg-red-50 hover:bg-red-100 border border-red-300 text-red-600 text-sm font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1 shadow-sm">
+                    <span>↺</span> <span>還原清除</span>
                 </button>
             </div>
-            <!-- 還原清除按鈕 -->
-            <button id="reset-btn" class="bg-red-50 hover:bg-red-100 border border-red-300 text-red-600 text-sm font-bold px-3 py-1.5 rounded transition-colors flex items-center gap-1 shadow-sm">
-                <span>↺</span> <span>還原清除</span>
-            </button>
+
+            <!-- 右下角工具區 -->
+            <div class="absolute bottom-4 right-4 flex flex-col items-end gap-3 z-10">
+                <div id="size-selector" class="hidden flex-col items-end gap-1 opacity-0 transition-opacity duration-300">
+                    <label for="pour-size" class="text-xs font-bold text-slate-600 bg-white/90 px-2 py-1 rounded shadow-sm">💧 倒水範圍</label>
+                    <select id="pour-size" class="bg-white border-2 border-blue-400 text-blue-700 font-bold px-3 py-1.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all">
+                        <option value="1">1 格 (1x1)</option>
+                        <option value="2">4 格 (2x2)</option>
+                        <option value="3">9 格 (3x3)</option>
+                        <option value="4">16 格 (4x4)</option>
+                    </select>
+                </div>
+                <button id="bucket-tool" class="bg-white border-2 border-gray-300 px-4 py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all select-none flex items-center gap-2">
+                    <span>🪣</span> <span>水桶 (關)</span>
+                </button>
+            </div>
         </div>
 
-        <!-- 右下角工具區 -->
-        <div class="absolute bottom-4 right-4 flex flex-col items-end gap-3 z-10">
-            <div id="size-selector" class="hidden flex-col items-end gap-1 opacity-0 transition-opacity duration-300">
-                <label for="pour-size" class="text-xs font-bold text-slate-600 bg-white/90 px-2 py-1 rounded shadow-sm">💧 倒水範圍</label>
-                <select id="pour-size" class="bg-white border-2 border-blue-400 text-blue-700 font-bold px-3 py-1.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all">
-                    <option value="1">1 格 (1x1)</option>
-                    <option value="2">4 格 (2x2)</option>
-                    <option value="3">9 格 (3x3)</option>
-                    <option value="4">16 格 (4x4)</option>
-                </select>
+        <!-- 平面監控圖 (加入座標軸) -->
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 flex flex-col items-center">
+            <h2 class="text-xl font-bold mb-4 text-slate-700">平面圖 (Top View)</h2>
+            
+            <div class="flex items-start">
+                <!-- Y軸標示 -->
+                <div class="flex flex-col justify-between text-xs font-mono font-bold text-slate-400 mr-2 h-[268px] py-[4px]">
+                    <span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
+                </div>
+                
+                <!-- 網格本體 -->
+                <div>
+                    <div id="top-grid" class="grid grid-cols-10 grid-rows-10 gap-[2px] bg-gray-700 p-1 rounded-md shadow-inner relative">
+                        <!-- 方格將由 JS 生成 -->
+                    </div>
+                    <!-- X軸標示 -->
+                    <div class="flex justify-between text-xs font-mono font-bold text-slate-400 mt-2 px-[4px] w-[268px]">
+                        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                    </div>
+                </div>
             </div>
-            <button id="bucket-tool" class="bg-white border-2 border-gray-300 px-4 py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all select-none flex items-center gap-2">
-                <span>🪣</span> <span>水桶 (關)</span>
-            </button>
+            
+            <div class="mt-5 flex gap-4 text-sm font-medium text-slate-600">
+                <div class="flex items-center gap-1"><div class="w-4 h-4 bg-[#d3d3d3] rounded-sm border border-gray-300"></div>無水</div>
+                <div class="flex items-center gap-1"><div class="w-4 h-4 bg-[#ffeb3b] rounded-sm border border-gray-300"></div>小量積水</div>
+                <div class="flex items-center gap-1"><div class="w-4 h-4 bg-[#f44336] rounded-sm border border-gray-300"></div>大量積水</div>
+                <div class="flex items-center gap-1 ml-2"><div class="w-4 h-4 bg-[#1a1a1a] rounded-full shadow-sm"></div>去水口</div>
+            </div>
         </div>
     </div>
 
-    <!-- 平面監控圖 (加入座標軸) -->
-    <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 flex flex-col items-center">
-        <h2 class="text-xl font-bold mb-4 text-slate-700">平面圖 (Top View)</h2>
-        
-        <div class="flex items-start">
-            <!-- Y軸標示 -->
-            <div class="flex flex-col justify-between text-xs font-mono font-bold text-slate-400 mr-2 h-[268px] py-[4px]">
-                <span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
-            </div>
-            
-            <!-- 網格本體 -->
-            <div>
-                <div id="top-grid" class="grid grid-cols-10 grid-rows-10 gap-[2px] bg-gray-700 p-1 rounded-md shadow-inner relative">
-                    <!-- 方格將由 JS 生成 -->
-                </div>
-                <!-- X軸標示 -->
-                <div class="flex justify-between text-xs font-mono font-bold text-slate-400 mt-2 px-[4px] w-[268px]">
-                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
-                </div>
+    <!-- ================= 模式 2：單塊地板 (Single Mode) ================= -->
+    <div id="single-mode-container" class="hidden flex-col items-center w-full">
+        <!-- 單一塊大場景 -->
+        <div class="relative w-[600px] h-[350px] bg-gradient-to-b from-sky-300 to-sky-100 border-2 border-slate-300 rounded-xl overflow-hidden shadow-lg mb-6 flex justify-center items-center" style="perspective: 1000px;">
+            <div id="single-tile" class="iso-cell level-0 w-[150px] h-[150px] border-4 border-white/50 box-border transition-all duration-500" style="transform: rotateX(60deg) rotateZ(135deg); transform-style: preserve-3d; box-shadow: 25px -25px 35px rgba(0,0,0,0.4);">
+                <div class="water-layer"></div>
             </div>
         </div>
         
-        <div class="mt-5 flex gap-4 text-sm font-medium text-slate-600">
-            <div class="flex items-center gap-1"><div class="w-4 h-4 bg-[#d3d3d3] rounded-sm border border-gray-300"></div>無水</div>
-            <div class="flex items-center gap-1"><div class="w-4 h-4 bg-[#ffeb3b] rounded-sm border border-gray-300"></div>小量積水</div>
-            <div class="flex items-center gap-1"><div class="w-4 h-4 bg-[#f44336] rounded-sm border border-gray-300"></div>大量積水</div>
-            <div class="flex items-center gap-1 ml-2"><div class="w-4 h-4 bg-[#1a1a1a] rounded-full shadow-sm"></div>去水口</div>
+        <!-- 狀態列 -->
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 w-[600px] text-center flex flex-col items-center">
+            <h2 class="text-xl font-bold mb-4 text-slate-700">Micro:bit 接收狀態</h2>
+            <div id="single-status" class="w-full text-2xl font-mono font-bold text-slate-500 bg-slate-100 py-4 rounded-lg border border-slate-200 transition-colors duration-300">
+                等待訊號... (預設: Low)
+            </div>
         </div>
     </div>
 
@@ -221,44 +250,69 @@
         const GRID_SIZE = 10;
         let waterLevels = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
         let bucketActive = false;
+        let currentMode = 'roof';
 
+        // 模式切換 DOM
+        const modeSelector = document.getElementById('mode-selector');
+        const roofModeContainer = document.getElementById('roof-mode-container');
+        const singleModeContainer = document.getElementById('single-mode-container');
+        const singleTile = document.getElementById('single-tile');
+        const singleStatus = document.getElementById('single-status');
+
+        // 模擬天台 DOM
         const isoGrid = document.getElementById('iso-grid');
         const topGrid = document.getElementById('top-grid');
         const bucketTool = document.getElementById('bucket-tool');
         const sceneContainer = document.getElementById('scene-container');
-        
         const rainBtn = document.getElementById('rain-btn');
         const rainType = document.getElementById('rain-type');
         const resetBtn = document.getElementById('reset-btn');
 
         let isRaining = false;
         let rainInterval;
-        let drainInterval; // 用於控制退水的定時器
+        let drainInterval; 
 
+        // ==========================================
+        // 模式切換邏輯
+        // ==========================================
+        modeSelector.addEventListener('change', (e) => {
+            currentMode = e.target.value;
+            if (currentMode === 'roof') {
+                roofModeContainer.classList.remove('hidden');
+                roofModeContainer.classList.add('flex');
+                singleModeContainer.classList.add('hidden');
+                singleModeContainer.classList.remove('flex');
+            } else {
+                roofModeContainer.classList.add('hidden');
+                roofModeContainer.classList.remove('flex');
+                singleModeContainer.classList.remove('hidden');
+                singleModeContainer.classList.add('flex');
+            }
+        });
+
+        // ==========================================
+        // 網格初始化 (天台模式)
+        // ==========================================
         function initGrids() {
-            // 清空舊容器
             isoGrid.innerHTML = '';
             topGrid.innerHTML = '';
 
-            // 1. 建立 3D 互動天台 (y: 0->9, x: 0->9)
+            // 1. 建立 3D 互動天台
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
                     let isoCell = document.createElement('div');
                     isoCell.className = 'iso-cell level-0 w-[30px] h-[30px] border border-white/30 box-border';
                     
-                    // 去水口 (0, 8)
                     if (x === 0 && y === 8) {
                         let hole = document.createElement('div');
                         hole.className = 'drain-hole';
                         isoCell.appendChild(hole);
                     }
 
-                    // 水層
                     let waterLayer = document.createElement('div');
                     waterLayer.className = 'water-layer';
                     isoCell.appendChild(waterLayer);
 
-                    // 四個角落加入座標標示
                     if ((x===0 && y===0) || (x===9 && y===0) || (x===0 && y===9) || (x===9 && y===9)) {
                         let label = document.createElement('span');
                         label.className = 'coord-label';
@@ -272,14 +326,12 @@
             }
 
             // 2. 建立 Top View 平面圖 
-            // 為了讓 (0,0) 在左下角，Y軸需要從 9 遞減到 0 來渲染
             for (let y = GRID_SIZE - 1; y >= 0; y--) {
                 for (let x = 0; x < GRID_SIZE; x++) {
                     let topCell = document.createElement('div');
                     topCell.className = 'top-cell level-0 w-[25px] h-[25px] transition-colors duration-300 relative';
                     topCell.id = `top-${x}-${y}`;
 
-                    // 去水口標示
                     if (x === 0 && y === 8) {
                         let hole = document.createElement('div');
                         hole.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[10px] h-[10px] bg-gray-900 rounded-full';
@@ -292,7 +344,7 @@
         }
 
         // ==========================================
-        // 倒水與 UI 更新
+        // 倒水與 UI 更新 (天台模式)
         // ==========================================
         bucketTool.addEventListener('click', () => {
             bucketActive = !bucketActive;
@@ -362,7 +414,6 @@
             let level = waterLevels[x][y];
             let isoIndex = y * GRID_SIZE + x;
             let isoCell = isoGrid.children[isoIndex];
-            // 替換顏色層級 class，保留其他 tailwind class
             isoCell.className = isoCell.className.replace(/level-\d/, `level-${level}`);
 
             let topCell = document.getElementById(`top-${x}-${y}`);
@@ -372,16 +423,13 @@
         }
 
         // ==========================================
-        // 還原、下雨與 L型退水邏輯
+        // 還原、下雨與 L型退水邏輯 (天台模式)
         // ==========================================
         resetBtn.addEventListener('click', resetAllWater);
 
         function resetAllWater() {
-            // 如果正在下雨，強制停止
-            if (isRaining) {
-                rainBtn.click(); // 觸發停止下雨
-            }
-            clearInterval(drainInterval); // 停止任何進行中的退水動畫
+            if (isRaining) rainBtn.click(); 
+            clearInterval(drainInterval); 
             
             for (let x = 0; x < GRID_SIZE; x++) {
                 for (let y = 0; y < GRID_SIZE; y++) {
@@ -396,7 +444,7 @@
             const btnText = rainBtn.querySelector('span:nth-child(2)');
 
             if (isRaining) {
-                clearInterval(drainInterval); // 下雨時中斷退卻邏輯
+                clearInterval(drainInterval); 
                 rainBtn.classList.replace('bg-blue-500', 'bg-slate-500');
                 rainBtn.classList.replace('hover:bg-blue-600', 'hover:bg-slate-600');
                 btnText.innerText = '停止下雨';
@@ -404,7 +452,6 @@
                 const level = parseInt(rainType.value);
                 rainInterval = setInterval(createGlobalRain, 30); 
                 
-                // 瞬間積水
                 setTimeout(() => {
                     for (let x = 0; x < GRID_SIZE; x++) {
                         for (let y = 0; y < GRID_SIZE; y++) {
@@ -419,50 +466,39 @@
                 rainBtn.classList.replace('hover:bg-slate-600', 'hover:bg-blue-600');
                 btnText.innerText = '開始下雨';
                 clearInterval(rainInterval);
-                
-                // 開始漸進退水
                 startDrain();
             }
         });
 
-        // 核心：L型層次退水邏輯
         function startDrain() {
             clearInterval(drainInterval);
             let currentDrainStep = 0;
 
             drainInterval = setInterval(() => {
                 let hasWaterLeft = false;
-
-                // 處理從最外層 (Layer 0) 開始，逐層向內推進 (向 0,0 靠近，配合排水孔方向)
-                // Layer k 定義為：x 軸的 `9-k` 這一行，與 y 軸的 `k` 這一列
                 for (let k = 0; k <= 9; k++) {
                     if (currentDrainStep >= k) {
-                        // 處理 y = k 的那一排 (橫向)，x 範圍從 0 到 9-k
                         for (let x = 0; x <= 9 - k; x++) {
                             if (waterLevels[x][k] > 0) {
-                                waterLevels[x][k]--; // 水位降一階 (紅->黃->無)
+                                waterLevels[x][k]--; 
                                 updateUI(x, k);
                                 hasWaterLeft = true;
                             }
                         }
-                        // 處理 x = 9-k 的那一排 (直向)，y 範圍從 k 到 9
                         for (let y = k; y <= 9; y++) {
                             if (waterLevels[9 - k][y] > 0) {
-                                waterLevels[9 - k][y]--; // 水位降一階
+                                waterLevels[9 - k][y]--; 
                                 updateUI(9 - k, y);
                                 hasWaterLeft = true;
                             }
                         }
                     }
                 }
-
                 currentDrainStep++;
-
-                // 如果全場積水都退完了，停止定時器
                 if (!hasWaterLeft && currentDrainStep > 9) {
                     clearInterval(drainInterval);
                 }
-            }, 350); // 每 0.35 秒退一步，創造緩慢退去的效果
+            }, 350); 
         }
 
         function createGlobalRain() {
@@ -508,14 +544,39 @@
                     let lines = buffer.split('\n');
                     buffer = lines.pop();
                     for (let line of lines) {
-                        let parts = line.trim().split(',');
-                        if (parts.length === 3) {
-                            let x = parseInt(parts[0]), y = parseInt(parts[1]), level = parseInt(parts[2]);
-                            if (x>=0 && x<10 && y>=0 && y<10 && level>=0 && level<=2) {
-                                waterLevels[x][y] = level; updateUI(x, y);
-                            }
-                        }
+                        processMicrobitData(line.trim());
                     }
+                }
+            }
+        }
+
+        function processMicrobitData(dataString) {
+            if (currentMode === 'roof') {
+                // 原有天台模式處理 (格式: "X,Y,LEVEL")
+                let parts = dataString.split(',');
+                if (parts.length === 3) {
+                    let x = parseInt(parts[0]), y = parseInt(parts[1]), level = parseInt(parts[2]);
+                    if (x>=0 && x<10 && y>=0 && y<10 && level>=0 && level<=2) {
+                        waterLevels[x][y] = level; 
+                        updateUI(x, y);
+                    }
+                }
+            } else if (currentMode === 'single') {
+                // 單塊地板模式處理 (格式: "Low", "Med", "Hight" 或 "High")
+                let signal = dataString;
+                
+                if (signal === "Low") {
+                    singleTile.className = singleTile.className.replace(/level-\d/, 'level-0');
+                    singleStatus.innerText = "訊號: Low (無積水)";
+                    singleStatus.className = "w-full text-2xl font-mono font-bold text-slate-500 bg-slate-100 py-4 rounded-lg border border-slate-200 transition-colors duration-300";
+                } else if (signal === "Med") {
+                    singleTile.className = singleTile.className.replace(/level-\d/, 'level-1');
+                    singleStatus.innerText = "訊號: Med (小量積水)";
+                    singleStatus.className = "w-full text-2xl font-mono font-bold text-yellow-600 bg-yellow-50 py-4 rounded-lg border border-yellow-300 transition-colors duration-300";
+                } else if (signal === "Hight" || signal === "High") {
+                    singleTile.className = singleTile.className.replace(/level-\d/, 'level-2');
+                    singleStatus.innerText = "訊號: " + signal + " (大量積水)";
+                    singleStatus.className = "w-full text-2xl font-mono font-bold text-red-600 bg-red-50 py-4 rounded-lg border border-red-300 transition-colors duration-300";
                 }
             }
         }
