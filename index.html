@@ -541,10 +541,34 @@
                 if (done) break;
                 if (value) {
                     buffer += value;
-                    let lines = buffer.split('\n');
-                    buffer = lines.pop();
-                    for (let line of lines) {
-                        processMicrobitData(line.trim());
+                    
+                    if (currentMode === 'single') {
+                        // 單塊地板模式：直接偵測字串，不需要換行符號
+                        let upperBuf = buffer.toUpperCase();
+                        if (upperBuf.includes("HIGHT") || upperBuf.includes("HIGH")) {
+                            processMicrobitData("High");
+                            buffer = ""; // 讀取後清空緩衝區
+                        } else if (upperBuf.includes("MED")) {
+                            processMicrobitData("Med");
+                            buffer = "";
+                        } else if (upperBuf.includes("LOW")) {
+                            processMicrobitData("Low");
+                            buffer = "";
+                        }
+                        
+                        // 避免緩衝區無限增長
+                        if (buffer.length > 200) {
+                            buffer = buffer.slice(-100);
+                        }
+                    } else {
+                        // 天台模式：仍需換行符號分割資料 (X,Y,LEVEL\n)
+                        let lines = buffer.split('\n');
+                        buffer = lines.pop(); // 保留最後未完成的片段
+                        for (let line of lines) {
+                            if (line.trim() !== "") {
+                                processMicrobitData(line.trim());
+                            }
+                        }
                     }
                 }
             }
@@ -562,20 +586,20 @@
                     }
                 }
             } else if (currentMode === 'single') {
-                // 單塊地板模式處理 (格式: "Low", "Med", "Hight" 或 "High")
-                let signal = dataString;
+                // 單塊地板模式處理
+                let signal = dataString.toUpperCase();
                 
-                if (signal === "Low") {
+                if (signal === "LOW") {
                     singleTile.className = singleTile.className.replace(/level-\d/, 'level-0');
                     singleStatus.innerText = "訊號: Low (無積水)";
                     singleStatus.className = "w-full text-2xl font-mono font-bold text-slate-500 bg-slate-100 py-4 rounded-lg border border-slate-200 transition-colors duration-300";
-                } else if (signal === "Med") {
+                } else if (signal === "MED") {
                     singleTile.className = singleTile.className.replace(/level-\d/, 'level-1');
                     singleStatus.innerText = "訊號: Med (小量積水)";
                     singleStatus.className = "w-full text-2xl font-mono font-bold text-yellow-600 bg-yellow-50 py-4 rounded-lg border border-yellow-300 transition-colors duration-300";
-                } else if (signal === "Hight" || signal === "High") {
+                } else if (signal === "HIGHT" || signal === "HIGH") {
                     singleTile.className = singleTile.className.replace(/level-\d/, 'level-2');
-                    singleStatus.innerText = "訊號: " + signal + " (大量積水)";
+                    singleStatus.innerText = "訊號: High (大量積水)";
                     singleStatus.className = "w-full text-2xl font-mono font-bold text-red-600 bg-red-50 py-4 rounded-lg border border-red-300 transition-colors duration-300";
                 }
             }
